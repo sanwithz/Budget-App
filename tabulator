@@ -1,0 +1,114 @@
+
+<!-- Tabulator -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/2.4.0/luxon.min.js" integrity="sha512-v1zUTZ9zv9Wb2scL/ANxXM6m7yegm/W5SN8SRHNFADdZIuSFFkrEBjNxO803DdFkjoCcJ88g1WHRVlLN6K/O1A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.2.4/dist/js/tabulator.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.2.7/dist/js/tabulator.min.js"></script>
+
+<script>
+//รับข้อมูลตัวแปล jsData จากฝั่ง GS มาแสดงผล
+    var delIcon = function(cell, formatterParams){ //plain text value
+    return "<i class='fa fa-trash' style='color:red'></i>"};
+
+const elements ={}
+document.addEventListener("DOMContentLoaded",pageLoad)
+
+function pageLoad(){
+  elements.alerts = document.getElementById("alerts")
+  loadData()
+}
+
+function loadData(){
+  google.script.run
+  .withSuccessHandler((jsData) => {
+  elements.table = new Tabulator("#data-table", {
+ 	height:"auto", 
+ 	data:jsData, 
+  layout:"fitColumns", 
+  history:true, 
+  paginationCounter:"rows",
+  movableColumns:false,
+
+ 	columns:[ 
+	 	{title:"", field:"Type", vertAlign:"middle",width:"4",formatter:"color"},
+    {title:"รายการ", field:"List", vertAlign:"middle",editor:true},
+    {title:"จำนวนเงิน", field:"Price",vertAlign:"middle", hozAlign:"center",editor:true, validator:"numeric", bottomCalcParams:{precision:2}, formatter:"money", formatterParams:{
+    decimal:".",thousand:",",symbol:" บาท",symbolAfter:"p",precision:2,
+}}, 
+    // {title:"ลบ", formatter:delIcon, width:"60", cellClick:function(e, cell){
+    //   cell.getRow().delete(); 
+      
+    //   }
+    // }
+ 	],
+})
+
+// // Function ลบ
+// elements.table.on("rowDeleted", function(row){ 
+//     //row - row component
+//             const id = row._row.data.Id
+//         // console.log(id)
+// elements.alerts.textContent = "Deleting..."  
+// google.script.run.withSuccessHandler((dataAfterDel)=>{
+//             showData(dataAfterDel) 
+//             elements.alerts.textContent = "Deleted"
+//             loadData()
+//             clearAlerts(elements.alerts)
+//             })  
+// .deleteRecord({id:id}) 
+// });
+
+// Function แก้ไข
+elements.table.on("cellEdited", function(cell){
+        //cell - cell component
+        const id = cell._cell.row.data.Id
+        const field = cell._cell.column.field  
+        const type = cell._cell.column.definition.formatter
+        const val = type ==="tickCross" ? Number(cell._cell.value): cell._cell.value       
+
+      if(["Price","List","Check"].includes(field)){           
+            google.script.run.withSuccessHandler((dataAfterDel)=>{
+            showData(dataAfterDel) 
+                Swal.fire({
+                position: 'center',
+                icon: 'success',
+                title: 'บันทึกข้อมูลเรียบร้อยแล้ว',
+                showConfirmButton: false,
+                timer: 1500
+              })
+    loadData()
+    document.getElementById("loading").classList.add('invisible');
+     element.alerts.textContent = "บันทึกข้อมูลสำเร็จแล้ว"
+     clearAlerts(element.alerts)
+   })
+            .withFailureHandler((er)=>{
+                Swal.fire({
+                position: 'center',
+                icon: 'waring',
+                title: 'ข้อมูลไม่ถูกต้อง',
+                showConfirmButton: false,
+                timer: 1500
+              })              
+            clearAlerts(element.alerts)
+            })
+            .editCell({id: id, val: val, field: field})
+            }
+
+})
+
+})
+.withFailureHandler((er) => {
+
+})
+.getData()  
+}
+
+function clearAlerts(el){
+  setTimeout(()=>{
+    el.textContent = ""
+  },1500)
+}
+
+function searchData(e){
+  elements.table.setFilter("List", "like", e.target.value)
+}
+       </script>
