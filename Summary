@@ -1,0 +1,27 @@
+<table id="summaryTable"  style="width:100%"></table>
+
+<script>
+  google.script.run.withSuccessHandler(showData).getDatatable();
+  function showData(dataArray){
+    console.log(dataArray)
+    $(document).ready(function(){
+    $('#summaryTable').DataTable({
+
+      data: dataArray,
+      columns: [
+      { title: "รายรับ" }, 
+      { title: "รายจ่าย" }, 
+      { title: "คงเหลือ"},     
+      ],
+       ordering:false,
+       destroy:true, 
+       searching: false,
+       bLengthChange: false,
+       paging:false,
+       info:false,
+       destroy:true,
+      });
+    });
+  }
+
+  </script>  
