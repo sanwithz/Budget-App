@@ -1,0 +1,41 @@
+
+<form id="myFormincome" class="row g-3" onsubmit="submitForm2(this)">
+   <div class="col-md-12">
+        <input type="text" id="type" name="type" value="green" style="display: none">
+        <input class="form-control text-center" type="text" id="list" name="list" placeholder="รายรับ" required>
+    </div>
+   <div class="col-md-12">
+        <input type="number" class="form-control text-center" id="income" name="income" placeholder="จำนวนเงินที่ได้รับ" required>
+    </div>
+
+<center>
+  <div class="col-12 text-center">
+    <button id="submitButton2" class="btn btn-primary" type="submit">บันทึก</button>
+      <br/>
+  <br/>
+  </div>
+</center>
+</form>
+
+
+<script>
+      function submitForm2(inc){
+        event.preventDefault()
+        var button2 = document.getElementById('submitButton2');
+        button2.innerHTML = "กำลังบันทึกข้อมูล...";
+        google.script.run.withSuccessHandler(()=>{
+        document.querySelector('#myFormincome').reset()
+        button2.innerHTML = "บันทึก";
+        Swal.fire({
+  position: 'center',
+  icon: 'success',
+   title: 'บันทึกข้อมูลเรียบร้อยแล้ว',
+  showConfirmButton: false,
+  timer: 1500
+})
+loadData();
+google.script.run.withSuccessHandler(showData).getDatatable();
+clearAlerts(element.classList);
+        }).incomeData(inc)
+        }
+</script>
